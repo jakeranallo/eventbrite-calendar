@@ -1,7 +1,9 @@
 import React from "react";
 import moment from "moment";
-import { range } from "moment-range";
+//import { range } from "moment-range";
 import "./calendar.css";
+import axios from "axios";
+
 export default class Calendar extends React.Component {
   weekdayshort = moment.weekdaysShort();
 
@@ -11,8 +13,46 @@ export default class Calendar extends React.Component {
     showDateTable: true,
     dateObject: moment(),
     allmonths: moment.months(),
-    selectedDay: null
+    selectedDay: null,
+    events: [],
+    isLoading: true,
+    errors: null
   };
+
+  async getEvents() {
+    let webApiUrl =
+      "https://api.webflow.com/collections/5c75b9db8dd1aea073b92c21/items?api_version=1.0.0";
+    let tokenStr =
+      "8ecd95dc36e18983f7632af2602b9e9aa8cf2bf441dc4cc7e9dd690ea50067de";
+
+    await axios
+      .get(webApiUrl, {
+        headers: {
+          Authorization: "Bearer " + tokenStr
+        }
+      })
+
+      .then(c => console.log(c));
+
+      // .then(json =>
+      //   json.data.items.map(result => ({
+      //     name: `${result.name}`,
+      //     content: `${result.content}`
+      //   }))
+      // )
+      // .then(events => {
+      //   this.setState({
+      //     events,
+      //     isLoading: false
+      //   });
+      // })
+      // .catch(error => this.setState({ error, isLoading: false }));
+  }
+
+  componentDidMount() {
+    this.getEvents();
+  }
+
   daysInMonth = () => {
     return this.state.dateObject.daysInMonth();
   };
@@ -209,7 +249,7 @@ export default class Calendar extends React.Component {
     });
     let blanks = [];
     for (let i = 0; i < this.firstDayOfMonth(); i++) {
-      blanks.push(<td className="calendar-day empty">{""}</td>);
+      blanks.push(<td key={i} className="calendar-day empty">{""}</td>);
     }
     let daysInMonth = [];
     for (let d = 1; d <= this.daysInMonth(); d++) {
@@ -255,14 +295,14 @@ export default class Calendar extends React.Component {
             onClick={e => {
               this.onPrev();
             }}
-            class="calendar-button button-prev"
+            className="calendar-button button-prev"
           />
           {!this.state.showMonthTable && (
             <span
               onClick={e => {
                 this.showMonth();
               }}
-              class="calendar-label"
+              className="calendar-label"
             >
               {this.month()}
             </span>
@@ -289,7 +329,7 @@ export default class Calendar extends React.Component {
           <div className="calendar-date">
             <table className="calendar-day">
               <thead>
-                <tr>{weekdayshortname}</tr>
+                <tr>{`weekdayshortname`}</tr>
               </thead>
               <tbody>{daysinmonth}</tbody>
             </table>
