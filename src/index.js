@@ -1,7 +1,10 @@
 import ReactDOM from "react-dom";
 import React, { Component } from 'react';
-import Calendar from 'react-calendar';
+import { Calendar, momentLocalizer } from 'react-big-calendar'
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from "axios";
+
  
 class App extends Component {
   state = {
@@ -13,9 +16,9 @@ class App extends Component {
 
   async getEvents() {
     let webApiUrl =
-      "https://api.webflow.com/collections/5c75b9db8dd1aea073b92c21/items?api_version=1.0.0";
+      "https://www.eventbriteapi.com/v3/users/me/events/";
     let tokenStr =
-      "8ecd95dc36e18983f7632af2602b9e9aa8cf2bf441dc4cc7e9dd690ea50067de";
+      "ZFP4UHEKXMUCMP6RLLH5";
 
     await axios
       .get(webApiUrl, {
@@ -24,21 +27,11 @@ class App extends Component {
         }
       })
 
-      .then(c => console.log(c));
-
-      // .then(json =>
-      //   json.data.items.map(result => ({
-      //     name: `${result.name}`,
-      //     content: `${result.content}`
-      //   }))
-      // )
-      // .then(events => {
-      //   this.setState({
-      //     events,
-      //     isLoading: false
-      //   });
-      // })
-      // .catch(error => this.setState({ error, isLoading: false }));
+    .then(response => {
+      const eventFetch = response.data.events
+      this.setState({ events: eventFetch })
+      console.log(this.state.events)
+  })
   }
 
   componentDidMount() {
@@ -46,13 +39,27 @@ class App extends Component {
   }
  
   render() {
+    const cal_events = []
+    const localizer = momentLocalizer(moment)
     return (
-      <div>
-        <Calendar
-          value={this.state.date}
-          tileContent={({ date, view }) => view === 'month' && date.getDate() === '2017-01-01' ? <p>It's Sunday!</p> : null}
-        />
+      <>
+      {this.state.events.map((event) => (
+          <div key={event.id}>
+           <p>{event.name.text}</p>  
+           <p>{event.start.local}</p>  
+           <p>{event.url}</p>            
+          </div>
+        ))}
+      <div style={{width:'500px', height:'500px'}}>
+          <Calendar
+          localizer={localizer}
+            events={cal_events}
+            step={30}
+            defaultView='month'
+            views={['month','week','day']}
+            defaultDate={new Date()}/>
       </div>
+      </>
     );
   }
 }
