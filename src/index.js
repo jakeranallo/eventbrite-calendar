@@ -17,7 +17,7 @@ class App extends Component {
 
   async getEvents() {
 
-    // Obscure this for security
+    // Obscure key for security
     
     const API_KEY =`${process.env.REACT_APP_API_KEY}`
 
@@ -42,18 +42,11 @@ class App extends Component {
         eventFetch[i].start.utc = moment.utc(eventFetch[i].start.utc).toDate();
         eventFetch[i].end.utc = moment.utc(eventFetch[i].end.utc).toDate();}
 
-      // TODO Map items to new names in array
+      // Map items to new names in array
 
-      eventFetch.map(event => ({
-        title: `${event.name.text}`,
-        start: `${event.start.utc}`,
-        end: `${event.end.utc}`,
-        url:`${event.url}`
-      }))
+      const mapEvents = eventFetch.map(({ name: {text:title}, start: {utc:start}, end: {utc:end}, url }) => ({ title, start, end, url }));
 
-      // TODO Destructure to only setState with required fields
-
-      this.setState({ events: eventFetch })
+      this.setState({ events: mapEvents })
       console.log(this.state.events)
   })
   }
@@ -65,6 +58,8 @@ class App extends Component {
   render() {
     const {events} = this.state
     const localizer = momentLocalizer(moment)
+    const onEventClick = (events) => window.open(events.url, '_blank')
+
     return (
       <div style={{width:'500px', height:'500px'}}>
           <Calendar
@@ -73,7 +68,10 @@ class App extends Component {
             step={30}
             defaultView='month'
             views={['month','week','day']}
-            defaultDate={new Date()}/>
+            defaultDate={new Date()}
+            onSelectEvent={events => onEventClick(events)}
+            />
+
       </div>
     );
   }
